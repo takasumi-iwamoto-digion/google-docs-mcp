@@ -1,0 +1,10 @@
+フォークリポジトリでPRを作成するURL:
+https://github.com/takasumi-iwamoto-digion/google-docs-mcp/compare/main...feature/simplify-markdown-formats
+
+このURLをブラウザで開いて、"Create pull request" ボタンをクリックしてください。
+
+PRの内容:
+- Title: feat: Simplify markdown formats and remove unnecessary metadata
+- Description: 上記で作成したPR本文を使用
+
+注: GitHub CLIでフォーク内のPRを作成できない理由は、mainブランチとfeatureブランチが同じリポジトリ内にあり、かつmainブランチがupstreamと同期されているためです。ブラウザからは問題なく作成できます。
