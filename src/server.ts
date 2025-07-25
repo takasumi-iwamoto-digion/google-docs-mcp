@@ -20,6 +20,7 @@ ApplyParagraphStyleToolParameters, ApplyParagraphStyleToolArgs,
 NotImplementedError
 } from './types.js';
 import * as GDocsHelpers from './googleDocsApiHelpers.js';
+import { convertDocsJsonToMarkdownMinimal } from './markdownDetailedConverter.js';
 
 let authClient: OAuth2Client | null = null;
 let googleDocs: docs_v1.Docs | null = null;
@@ -104,7 +105,7 @@ name: 'readGoogleDoc',
 description: 'Reads the content of a specific Google Document, optionally returning structured data.',
 parameters: DocumentIdParameter.extend({
 format: z.enum(['text', 'json', 'markdown']).optional().default('text')
-.describe("Output format: 'text' (plain text, possibly truncated), 'json' (raw API structure, complex), 'markdown' (experimental conversion).")
+.describe("Output format: 'text' (plain text, possibly truncated), 'json' (raw API structure, complex), 'markdown' (clean conversion with minimal metadata).")
 }),
 execute: async (args, { log }) => {
 const docs = await getDocsClient();
@@ -126,10 +127,14 @@ log.info(`Reading Google Doc: ${args.documentId}, Format: ${args.format}`);
         }
 
         if (args.format === 'markdown') {
-            // TODO: Implement Markdown conversion logic (complex)
-            log.warn("Markdown conversion is not implemented yet.");
-             throw new NotImplementedError("Markdown output format is not yet implemented.");
-            // return convertDocsJsonToMarkdown(res.data);
+            try {
+                // Use minimal mode (no listId, no headingId)
+                const markdownContent = convertDocsJsonToMarkdownMinimal(res.data);
+                return markdownContent || 'Document is empty or could not be converted to Markdown.';
+            } catch (conversionError: any) {
+                log.error(`Error converting to Markdown: ${conversionError.message}`);
+                throw new UserError(`Failed to convert document to Markdown: ${conversionError.message}`);
+            }
         }
 
         // Default: Text format
